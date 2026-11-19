@@ -1,5 +1,9 @@
 #### Golang CTF加解密工具
 
+> **仅供 CTF 和本地学习。** 部分算法过时，且示例代码使用固定密钥；不要用于保护生产数据、真实凭据或通信。下方终端记录省略了私钥内容。请勿提交或分享实际使用的私钥。
+>
+> **术语说明：** Base64、Base32、Hex 是编码；SHA、MD5 是哈希；HMAC 是消息认证码；PBKDF2、HKDF、scrypt 是密钥派生函数。它们不等同于可逆加密。
+
 ``` bash
 ----------------------------------------------------------
  ____          _               _  __           _ _
@@ -52,9 +56,7 @@ QCCF5p90uwIaxXxmJw6aAwIrsNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
 ------------------------------------------------------
 -- your ECC private key is:
  [-----BEGIN  WUMAN ECC PRIVATE KEY -----
-MHcCAQEEIH4OwCsvWhJGfSa6jestEaEEW/92rynOKvkq6t8glExooAoGCCqGSM49
-AwEHoUQDQgAEKKcMkz7SfPBUXpsDMdkFaZnYnQJXQCCF5p90uwIaxXxmJw6aAwIr
-sNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
+[示例私钥内容已省略]
 -----END  WUMAN ECC PRIVATE KEY -----
 ]
 ```
@@ -87,9 +89,7 @@ n casd 39
 -- Reading eccprivate key from eccprivate.pem...
 -- eccprivate key:
  [-----BEGIN  WUMAN ECC PRIVATE KEY -----
-MHcCAQEEIH4OwCsvWhJGfSa6jestEaEEW/92rynOKvkq6t8glExooAoGCCqGSM49
-AwEHoUQDQgAEKKcMkz7SfPBUXpsDMdkFaZnYnQJXQCCF5p90uwIaxXxmJw6aAwIr
-sNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
+[示例私钥内容已省略]
 -----END  WUMAN ECC PRIVATE KEY -----
 ]
 [+] Beginning ECC Decryption......
@@ -117,9 +117,7 @@ QCCF5p90uwIaxXxmJw6aAwIrsNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
 ------------------------------------------------------
 -- your ECC private key is:
  [-----BEGIN  WUMAN ECC PRIVATE KEY -----
-MHcCAQEEIH4OwCsvWhJGfSa6jestEaEEW/92rynOKvkq6t8glExooAoGCCqGSM49
-AwEHoUQDQgAEKKcMkz7SfPBUXpsDMdkFaZnYnQJXQCCF5p90uwIaxXxmJw6aAwIr
-sNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
+[示例私钥内容已省略]
 -----END  WUMAN ECC PRIVATE KEY -----
 ]
 ```
@@ -159,9 +157,7 @@ y casd
 -- Reading eccprivate key from eccprivate.pem...
 -- eccprivate key:
  [-----BEGIN  WUMAN ECC PRIVATE KEY -----
-MHcCAQEEIH4OwCsvWhJGfSa6jestEaEEW/92rynOKvkq6t8glExooAoGCCqGSM49
-AwEHoUQDQgAEKKcMkz7SfPBUXpsDMdkFaZnYnQJXQCCF5p90uwIaxXxmJw6aAwIr
-sNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
+[示例私钥内容已省略]
 -----END  WUMAN ECC PRIVATE KEY -----
 ]
 [+] Beginning ECC Decryption......

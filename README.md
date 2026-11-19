@@ -1,251 +1,72 @@
-#### Golang CTF加解密工具
+# goendecoder
 
-> **仅供 CTF 和本地学习。** 部分算法过时，且示例代码使用固定密钥；不要用于保护生产数据、真实凭据或通信。下方终端记录省略了私钥内容。请勿提交或分享实际使用的私钥。
->
-> **术语说明：** Base64、Base32、Hex 是编码；SHA、MD5 是哈希；HMAC 是消息认证码；PBKDF2、HKDF、scrypt 是密钥派生函数。它们不等同于可逆加密。
+一个面向 CTF 和本地算法练习的 Go 命令行工具。菜单涵盖常见编码、哈希、密钥派生、对称加密，以及 RSA、ECC 等公钥操作。
 
-``` bash
-----------------------------------------------------------
- ____          _               _  __           _ _
-| __ ) _   _  | |   _   _  ___(_)/ _| ___ _ __/ / |
-|  _ \| | | | | |  | | | |/ __| | |_ / _ \ '__| | |
-| |_) | |_| | | |__| |_| | (__| |  _|  __/ |  | | |
-|____/ \__, | |_____\__,_|\___|_|_|  \___|_|  |_|_|
-       |___/
-----------------------------------------------------------
-QQ 1185151867
---############################ :)hack all asshole things:)
-----------------------------------------------------------
+> [!WARNING]
+> **仅供本地学习，不用于生产。** 项目含过时算法和固定示例密钥，请勿用于保护真实数据、凭据或通信。请勿将实际使用的私钥提交到仓库或发到公开日志。
+
+[快速开始](#快速开始) · [菜单速查](#菜单速查) · [界面预览](#界面预览) · [启动排查](#启动排查)
+
+## 快速开始
+
+程序会询问输入是否包含空格。下面是交互输入，不是系统命令：
+
+| 模式 | 交互格式 |
+| --- | --- |
+| 不含空格 | 输入 `n <字符串> <菜单编号>` |
+| 含空格 | 输入 `y <字符串>`，再按提示在下一行输入菜单编号 |
+
+例如，把 `hello` 编码为 Base64：
+
+```text
+n hello 1
 ```
 
-### Example Pics
+预期编码结果为 `aGVsbG8=`。用菜单 `2` 可解码回 `hello`。Base64 是编码，不提供保密性。
 
-![](/showpics/show.jpg)
+<details>
+<summary>ECC 演示：生成密钥、加密和解密</summary>
 
-![](/showpics/show1.jpg)
+1. 输入 `n demo 9999`，生成本地演示密钥。
+2. 输入 `n hello 38`，加密结果写入 `ecc-encrypted.txt`。
+3. 输入 `n demo 39`，程序从本地文件读取密文并解密。此处的 `demo` 只是交互格式所需的占位输入，不是密文。
 
+每条命令对应一次程序交互。只使用演示数据，勿复制终端打印的私钥。
 
-## Usage
+</details>
 
-``` bash
-----------------------------------------------------------
-[+] please choose your choice to encode or decode strings:
-[+] usage: [your string to convert + choice number]
-[+] list of choices:
-----------------------------------------------------------
-```
+## 菜单速查
 
-#### Example
+编号沿用当前命令行菜单，未列出的编号不是文档漏项。表中成对编号依次为编码／解码或加密／解密。
 
-## En/Dedode a string without spaces using ECC Encryption
+| 类别 | 操作 | 菜单编号 |
+| --- | --- | --- |
+| 编码 | Base64 · Base64 URL-safe · Base32 | `1` / `2` · `18` / `19` · `57` / `58` |
+| 编码 | ASCII Hex · Hex dump | `9` / `10` · `65` |
+| 哈希 | MD5（含盐示例） · SHA-1 · SHA-256 · RIPEMD-160 · MD4 · SHAKE256 | `11` · `12` · `14` · `26` · `43` · `62` |
+| 消息认证 | HMAC-MD5 · HMAC-SHA1 · HMAC-SHA512 | `13` · `15` · `17` |
+| 密钥派生 | PBKDF2 · HKDF · scrypt | `34` · `56` · `61` |
+| AES | CBC · ECB · CFB | `3` / `4` · `5` / `6` · `7` / `8` |
+| AES | CTR · GCM · OFB | `32` / `33` · `44` / `45` · `48` / `49` |
+| DES | ECB · CBC · CFB · CTR · OFB | `20` / `21` · `22` / `23` · `46` / `47` · `50` / `51` · `52` / `53` |
+| 其他对称操作 | 3DES-CBC · 3DES-ECB · AzDG · Blowfish-ECB · Caesar | `24` / `25` · `27` / `28` · `30` / `31` · `41` / `42` · `63` / `64` |
+| 其他对称操作 | RC4 · NaCl secretbox | `29` · `60` |
+| RSA | 生成密钥 · 加密／解密（Hex） · 签名确认 | `999` · `35` / `36` · `37` |
+| ECC | 生成 P-256 密钥 · 加密／解密 · 签名确认 · ECDSA 验签 | `9999` · `38` / `39` · `40` · `54` |
+| 其他公钥操作 | 检查公钥类型 · NaCl box | `55` · `59` |
 
- - first generate ecc public and private key
+## 界面预览
 
-``` bash
-n casdc 9999
-- you choose [n]
-- {your string [casdc], your choice [9999]}
--- Generating ECC public and private keys......
--- generat ECC public and private key successful......
--- your ECC public key is:
- [-----BEGIN  WUMAN ECC PUBLIC KEY -----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEKKcMkz7SfPBUXpsDMdkFaZnYnQJX
-QCCF5p90uwIaxXxmJw6aAwIrsNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
------END  WUMAN ECC PUBLIC KEY -----
-]
-------------------------------------------------------
--- your ECC private key is:
- [-----BEGIN  WUMAN ECC PRIVATE KEY -----
-[示例私钥内容已省略]
------END  WUMAN ECC PRIVATE KEY -----
-]
-```
+![goendecoder 的彩色命令行菜单](showpics/show.jpg)
 
- - then input your string to encode
+<details>
+<summary>查看另一张终端截图</summary>
 
-``` bash
-n 我草泥马 38
-- you choose [n]
-- {your string [我草泥马], your choice [38]}
--- Reading eccpublic key from eccpublic.pem...
--- eccpublic key:
- [-----BEGIN  WUMAN ECC PUBLIC KEY -----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEKKcMkz7SfPBUXpsDMdkFaZnYnQJX
-QCCF5p90uwIaxXxmJw6aAwIrsNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
------END  WUMAN ECC PUBLIC KEY -----
-]
-[+] Beginning ECC Encryption......
-- start writing ECC encrypted data to ecc-encrypted.txt...
-- convert plaintext [我草泥马] to ECC hex encryption result [046210648396eadeec655a5e9e72f15ad49f140df0f04a825b499b902f471997b3b5f95b407d006441483bd2caf9717bb8a985457ffd08e59cb5ff65a68402a807b5c959953ac3c1ea17127a9aae06dddbb540cc43218ca6b100e15c3631d1e7155728b5171c1235bd6abe676732aa03268976e657a9a16e3a26678891]
------------------ecc encryption over-----------------
-```
+![goendecoder 的交互示例](showpics/show1.jpg)
 
- - then decode the encrypted text to plaintext
+</details>
 
-``` bash
-n casd 39
-- you choose [n]
-- {your string [casd], your choice [39]}
--- Reading eccprivate key from eccprivate.pem...
--- eccprivate key:
- [-----BEGIN  WUMAN ECC PRIVATE KEY -----
-[示例私钥内容已省略]
------END  WUMAN ECC PRIVATE KEY -----
-]
-[+] Beginning ECC Decryption......
-[+] Reading byte ecc encrypted data from ecc-encrypted.txt...
-- convert ecc encrypted byte data from ecc-encrypted.txt to plaintext: [我草泥马]
------------------ecc decryption over-----------------
-```
+## 启动排查
 
-## En/Dedode a string with spaces include using ECC Encryption
-
- - first generate ecc public and private key
-
-``` bash
-n casdc 9999
-- you choose [n]
-- {your string [casdc], your choice [9999]}
--- Generating ECC public and private keys......
--- generat ECC public and private key successful......
--- your ECC public key is:
- [-----BEGIN  WUMAN ECC PUBLIC KEY -----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEKKcMkz7SfPBUXpsDMdkFaZnYnQJX
-QCCF5p90uwIaxXxmJw6aAwIrsNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
------END  WUMAN ECC PUBLIC KEY -----
-]
-------------------------------------------------------
--- your ECC private key is:
- [-----BEGIN  WUMAN ECC PRIVATE KEY -----
-[示例私钥内容已省略]
------END  WUMAN ECC PRIVATE KEY -----
-]
-```
-
- - then input your string to encode
-
-``` bash
-y 我 操 你 妈妈
-- you choose [y]
-- {your string [我 操 你 妈妈
-]}
-38
-- {your choice [38]}
--- Reading eccpublic key from eccpublic.pem...
--- eccpublic key:
- [-----BEGIN  WUMAN ECC PUBLIC KEY -----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEKKcMkz7SfPBUXpsDMdkFaZnYnQJX
-QCCF5p90uwIaxXxmJw6aAwIrsNvp/7oPDM2YfD0efFhHB4lbKsdR5WsV0Q==
------END  WUMAN ECC PUBLIC KEY -----
-]
-[+] Beginning ECC Encryption......
-- start writing ECC encrypted data to ecc-encrypted.txt...
-- convert plaintext [我 操 你 妈妈
-] to ECC hex encryption result [0499173f0b7246278597bb1268ba64da228b6e447ea184dfa8c14277fff6c7da170cd24acf341ae2856137c90c00b495573484dd0bc133aae1a5540a17fcda9dd37b47d037f1410acc6b4ebcaa47ae18fd1b23bcc47cce5fa27b8746a1143908b9bab8cdea55d76ffc9f82e88ef2345240f7d10dde9962967bd6077c3e7f8023eb9e06b658]
------------------ecc encryption over-----------------
-```
-
- - then decode the encrypted text to plaintext
-
-``` bash
-y casd
-- you choose [y]
-- {your string [casd
-]}
-39
-- {your choice [39]}
--- Reading eccprivate key from eccprivate.pem...
--- eccprivate key:
- [-----BEGIN  WUMAN ECC PRIVATE KEY -----
-[示例私钥内容已省略]
------END  WUMAN ECC PRIVATE KEY -----
-]
-[+] Beginning ECC Decryption......
-[+] Reading byte ecc encrypted data from ecc-encrypted.txt...
-- convert ecc encrypted byte data from ecc-encrypted.txt to plaintext: [我 操 你 妈妈
-]
------------------ecc decryption over-----------------
-```
-
-- other en/decryption method are just like this
-
-#### Support Encryption and decryption algorithm 
-
- - 1. base64 encode
- - 2. base64 decode
- - 3. Aes cbc model encode
- - 4. Aes cbc model decode
- - 5. Aes ecb model encode
- - 6. Aes ecb model decode
- - 7. Aes cfb model encode
- - 8. Aes cfb model decode
- - 9. hex encode (ASCII hex)
- - 10. hex decode (ASCII hex)
- - 11. md5 encode (md5($pass.$salt);Joomia)
- - 12. sha1 encode
- - 13. hmac encode (md5)
- - 14. sha256 encode
- - 15. hmac-sha1 encode
- - 17. hmac-sha512 encode
- - 18. Base64Url Safe encode <not contain ('/','+');replaced by ('_','-');('=') removed>
- - 19. Base64Url Safe decode
- - 20. des Ecb encryption
- - 21. des Ecb decryption
- - 22. des Cbc encryption
- - 23. des Cbc decryption
- - 24. 3des Cbc encryption
- - 25. 3des Cbc decryption
- - 26. Ripemd160 encryption
- - 27. 3des Ecb encryption
- - 28. 3des Ecb decryption
- - 29. Rc4 encryption
- - 30. AzDG encryption
- - 31. AzDG decryption
- - 32. Aes CTR encryption
- - 33. Aes CTR decryption
- - 34. PBKDF2 encryption (set <passwdrd, salt, iter, keylen, hash> to strong encrypt data)
- - 999. [--Generate Rsa Public and Private Key :)--]
- - 35. RSA hex formate encryption
- - 36. RSA hex formate decryption
- - 37. RSA sign confirm
- - 9999. [ECC Key generate] --(bitcoin and ID card ... used)--[elliptic.P256() used]
- - 38. ECC Encryption --(bitcoin and ID card ... used)--[elliptic.P256() used]
- - 39. ECC Decryption --(bitcoin and ID card ... used)--[elliptic.P256() used]
- - 40. ECC sign confirm --(bitcoin and ID card ... used)--[elliptic.P256() used]
- - 41. Blowfish Ecb Encryption
- - 42. Blowfish Ecb Decryption
- - 43. Md4 encryption
- - 44. Aes Gcm Encryption [Ethereum Whisper protocol used]
- - 45. Aes Gcm Decryption [Ethereum Whisper protocol used]
- - 46. des Cfb encryption
- - 47. des Cfb decryption
- - 48. AES OFB Encryption
- - 49. AES OFB Decryption
- - 50. des Ctr encryption
- - 51. des Ctr decryption
- - 52. des Ofb encryption
- - 53. des Ofb decryption
- - 54. Elliptic Curve Digital Signature Verified
- - 55. Vertfied pub key types
- - 56. HKDF encryption
- - 57. base32 encryption
- - 58. base32 decryption
- - 59. nacl box encryption and decryption
- - 60. nacl secretbox encryption and decryption
- - 61. scrypt encryption [Bitcoin used strong encryption]
- - 62. Shake256 encryption
- - 63. Caesar encryption
- - 64. Caesar decryption
- - 65. hex dump
-
-### 优点特色
-
- - 支持多达65种加解密算法
- - 彩色输出美化
- - 持续添加更多算法支持
-
-### 注意
- - 如果工具打开报错请把flag.txt和go build生成的goendecoder.exe放在同一目录下即可
- - 有任何问题请联系qq:1185151867 :)
-
-:) enjoy it ! :)
+- 源码位于 [`sourcecode/`](sourcecode/)。仓库没有 Go module 清单，不能假定全新环境下直接运行 `go build` 就能成功。
+- 程序从**当前工作目录**读取 [`flag.txt`](flag.txt)。遇到找不到文件的错误时，确认启动目录包含该文件。
